@@ -15,26 +15,36 @@
 # limitations under the License.
 #
 
+# LOCAL VARIABLES
+builder_ccache_only="false" # current: disabled
+builder_ccache_url=http://roms.apon77.workers.dev/ccache/ci2/ccache.tar.gz
+
 # Set the bot for this background script
 bot_send() {
         curl -s "https://api.telegram.org/bot${telegram_bot_api}/sendmessage" -d "text=${1}" -d "chat_id=${telegram_chat_id}" -d "parse_mode=HTML"
 }
 
-bot_send "Start CCache download!"
+if ${builder_ccache_only}; then
 
-# Current ccache
-ccache_url=http://roms.apon77.workers.dev/ccache/ci2/ccache.tar.gz
+  bot_send "Skipping CCache download!"
+  echo "Skipping CCache download!"
 
-# Working dir
-cd "${CIRRUS_WORKING_DIR}"/../ || { echo "Dir not found..."; exit 1; }
+else
 
-# Using aria2c for download
-aria2c "${ccache_url}" -x16 -s50
+  bot_send "Start CCache download!"
 
-# Extract ccache
-tar xf ccache.tar.gz 
+  # Working dir
+  cd "${CIRRUS_WORKING_DIR}"/../ || { echo "Dir not found..."; exit 1; }
 
-# Remove downloaded file
-rm -rf ccache.tar.gz
+  # Using aria2c for download
+  aria2c "${builder_ccache_url}" -x16 -s50
 
-bot_send "Download CCache done!"
+  # Extract ccache
+  tar xf ccache.tar.gz 
+
+  # Remove downloaded file
+  rm -rf ccache.tar.gz
+
+  bot_send "Download CCache done!"
+
+fi
