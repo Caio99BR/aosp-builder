@@ -115,13 +115,6 @@ cd "${buildsh_working_dir}" || { echo "Dir not found..."; exit 1; }
 
 bot_send "Sync start!"
 
-# Update repo
-builder_repo_bin="${CIRRUS_WORKING_DIR}/../.bin"
-mkdir -p "${builder_repo_bin}"
-export PATH="${builder_repo_bin}:${PATH}"
-curl "https://gerrit.googlesource.com/git-repo/+/refs/heads/main/repo?format=TEXT" | base64 --decode > ${builder_repo_bin}/repo
-chmod a+rx ${builder_repo_bin}/repo
-
 # Repo init command, that -device,-mips,-darwin,-notdefault part will save you more time and storage to sync, add more according to your rom and choice.
 # Optimization is welcomed! Let's make it quit, and with depth=1 so that no unnecessary things.
 repo init -q --no-repo-verify --depth=1 -u ${rom_manifest} -b ${rom_manifest_branch} -g default,-device,-mips,-darwin,-notdefault
