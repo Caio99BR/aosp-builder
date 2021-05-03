@@ -43,7 +43,7 @@ else
   aria2c "${builder_ccache_url}" -x16 -s50 || { bot_send "File not found..."; exit 1; }
 
   # Extract ccache
-  tar xf ccache.tar.gz 
+  time tar xf ccache.tar.gz 
 
   # Remove downloaded file
   rm -rf ccache.tar.gz
