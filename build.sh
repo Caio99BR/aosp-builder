@@ -31,9 +31,12 @@ builder_target_device="mido"
 builder_target_brand="xiaomi"
 builder_ccache_only="false" # current: disabled
 builder_temp_upload="false" # upload to drive
+builder_extract_vendor="false" # current: disabled
+builder_lastest_rom="" # Latest zip
 
 # Build.sh VARIABLES
 buildsh_working_dir="${CIRRUS_WORKING_DIR}/../rom" # Where the rom is builded
+buildsh_dump_rom="${CIRRUS_WORKING_DIR}/../dump_rom"
 buildsh_rclone_config=$(echo "${rclone_config}" | head -1)
 buildsh_rclone_config="${buildsh_rclone_config:1:-1}"
 
@@ -90,6 +93,68 @@ git clone "${builder_github}" --depth 1 -b "${builder_github_branch}" .repo/loca
 repo sync -c --no-clone-bundle --no-tags --optimized-fetch --prune --force-sync -j 30 || repo sync -c --no-clone-bundle --no-tags --optimized-fetch --prune --force-sync -j 8
 
 bot_send "Sync done!"
+
+# Extract vendor blobs direct from latest zip
+# Based on Lineage and other source
+# https://wiki.lineageos.org/extracting_blobs_from_zips.html
+if ${builder_extract_vendor}; then
+  # Create the system_dump directory.
+  mkdir -p ${buildsh_dump_rom}/
+  
+  # Enter the system_dump directory.
+  cd ${buildsh_dump_rom}/ || { echo "Dir not found..."; exit 1; }
+
+  # Install brotli
+  sudo apt-get install brotli wget
+
+  # Download sdat2img
+  wget https://raw.githubusercontent.com/xpirt/sdat2img/master/sdat2img.py
+
+  # Download the build zip.
+  wget ${builder_lastest_rom}
+
+  basename_rom=$(basename *.zip)
+
+  if [ ! -f "${basename_rom}" ]; then
+    echo "Vendor blobs zip file not found..."
+	exit 1
+  fi
+
+  # Extract the system and vendor data from the LineageOS archive.
+  unzip ${basename_rom}.zip system.transfer.list system.new.dat*
+  unzip ${basename_rom}.zip vendor.transfer.list vendor.new.dat* 
+
+  # The vendor and system data files are compress, so decompress them before we use them.
+  if [ -f "system.new.dat.br" ];then
+    brotli --decompress --output=system.new.dat system.new.dat.br
+  fi
+  if [ -f "vendor.new.dat.br" ];then
+    brotli --decompress --output=vendor.new.dat vendor.new.dat.br
+  fi
+
+  # Convert dat files to img files that can be mounted.
+  python sdat2img.py system.transfer.list system.new.dat system.img
+  python sdat2img.py vendor.transfer.list vendor.new.dat vendor.img
+
+  # Mount system/
+  mkdir system/
+  sudo mount system.img system/
+
+  # Mount system/vendor/
+  sudo rm system/vendor
+  sudo mkdir system/vendor
+  sudo mount vendor.img system/vendor/
+
+  # Go to device-tree
+  cd ${buildsh_working_dir}/device/${builder_target_brand}/${builder_target_device}/ || { echo "Dir not found..."; exit 1; }
+
+  # Finally extract device blobs
+  ./extract-files.sh ${buildsh_dump_rom}/
+
+  # Back the working dir
+  cd ${buildsh_working_dir} || { echo "Dir not found..."; exit 1; }
+
+fi
 
 # Normal build steps
 . build/envsetup.sh
