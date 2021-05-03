@@ -19,16 +19,16 @@
 
 # ROM BUILD VARIABLES
 rom_manifest="git://github.com/AospExtended/manifest.git"
-rom_manifest_branch="11.x"
+rom_manifest_branch="10.x"
 rom_make_args="aex"
 rom_make_lunch="aosp_"
 rom_make_type="-user"
 
 # DEVICE BUILD VARIABLES
-builder_github="https://github.com/Apon77Lab/android_.repo_local_manifests.git"
-builder_github_branch="aex"
-builder_target_device="mido"
-builder_target_brand="xiaomi"
+builder_github="https://github.com/ECr34T1v3/android_.repo_local_manifests.git"
+builder_github_branch="main"
+builder_target_device="beyond0lte"
+builder_target_brand="samsung"
 builder_ccache_only="false" # current: disabled
 builder_temp_upload="false" # upload to drive
 builder_extract_vendor="false" # current: disabled
