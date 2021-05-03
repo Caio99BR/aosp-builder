@@ -79,12 +79,9 @@ compress_ccache()
   tar --use-compress-program="pigz -k -${2} " -cf "${1}".tar.gz "${1}"
 }
 
-if ${builder_ccache_only}; then
-
-  bot_send "Skipping CCache download!"
-
-else
-
+# Download CCache function
+download_ccache()
+{
   bot_send "Start CCache download!"
 
   # Working dir
@@ -100,6 +97,14 @@ else
   rm -rf ccache.tar.gz
 
   bot_send "Download CCache done!"
+}
+if ${builder_ccache_only}; then
+
+  bot_send "Skipping CCache download!"
+
+else
+
+  download_ccache &
 
 fi
 
