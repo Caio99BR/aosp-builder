@@ -55,6 +55,7 @@ bot_git_branch=$(git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/(\1)
 # Set bot function
 bot_send() {
         curl -s "https://api.telegram.org/bot${telegram_bot_api}/sendmessage" -d "text=${bot_git_branch} ${1}" -d "chat_id=${telegram_chat_id}" -d "parse_mode=HTML"
+		echo "${bot_git_branch} ${1}"
 }
 
 # Set the upload function
@@ -119,7 +120,7 @@ if ${builder_extract_vendor}; then
   basename_rom=$(basename ./*.zip)
 
   if [ ! -f "${basename_rom}" ]; then
-    echo "Vendor blobs zip file not found..."
+    bot_send "Vendor blobs zip file not found..."
 	exit 1
   fi
 
@@ -155,7 +156,7 @@ if ${builder_extract_vendor}; then
   ./extract-files.sh "${buildsh_dump_rom}"/
 
   # Back the working dir
-  cd "${buildsh_working_dir}" || { echo "Dir not found..."; exit 1; }
+  cd "${buildsh_working_dir}" || { bot_send "Dir not found..."; exit 1; }
 
 fi
 
@@ -186,7 +187,7 @@ fi
 
 ccache -s # Let's print ccache statistics finally
 
-cd "${CIRRUS_WORKING_DIR}"/../ || { echo "Dir not found..."; exit 1; }
+cd "${CIRRUS_WORKING_DIR}"/../ || { bot_send "Dir not found..."; exit 1; }
 
 # Compress ccache with same name
 compress_ccache ccache 1

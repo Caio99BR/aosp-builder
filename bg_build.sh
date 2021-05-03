@@ -25,22 +25,22 @@ bot_git_branch=$(git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/(\1)
 # Set bot function
 bot_send() {
         curl -s "https://api.telegram.org/bot${telegram_bot_api}/sendmessage" -d "text=${bot_git_branch} ${1}" -d "chat_id=${telegram_chat_id}" -d "parse_mode=HTML"
+		echo "${bot_git_branch} ${1}"
 }
 
 if ${builder_ccache_only}; then
 
   bot_send "Skipping CCache download!"
-  echo "Skipping CCache download!"
 
 else
 
   bot_send "Start CCache download!"
 
   # Working dir
-  cd "${CIRRUS_WORKING_DIR}"/../ || { echo "Dir not found..."; exit 1; }
+  cd "${CIRRUS_WORKING_DIR}"/../ || { bot_send "Dir not found..."; exit 1; }
 
   # Using aria2c for download
-  aria2c "${builder_ccache_url}" -x16 -s50
+  aria2c "${builder_ccache_url}" -x16 -s50 || { bot_send "File not found..."; exit 1; }
 
   # Extract ccache
   tar xf ccache.tar.gz 
