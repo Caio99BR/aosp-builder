@@ -88,7 +88,7 @@ download_ccache()
   cd "${CIRRUS_WORKING_DIR}"/../ || { bot_send "Dir not found..."; exit 1; }
 
   # Using aria2c for download
-  aria2c "${builder_ccache_url}" -x16 -s50 || { bot_send "File not found..."; exit 1; }
+  aria2c "${builder_ccache_url}" -x16 -s50 || aria2c "${builder_ccache_url}" -x16 -s50 || { bot_send "File not found..."; exit 1; }
 
   # Extract ccache
   time tar xf ccache.tar.gz 
