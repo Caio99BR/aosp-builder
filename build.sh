@@ -46,9 +46,15 @@ export CCACHE_DIR="/tmp/ccache"
 export CCACHE_EXEC="${ccache_exec}"
 export USE_CCACHE="1"
 
+# Enter the working dir
+cd "${CIRRUS_WORKING_DIR}" || { echo "Dir not found..."; exit 1; }
+
+# GIT VARIABLES
+bot_git_branch=$(git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/(\1)/')
+
 # Set bot function
 bot_send() {
-        curl -s "https://api.telegram.org/bot${telegram_bot_api}/sendmessage" -d "text=${1}" -d "chat_id=${telegram_chat_id}" -d "parse_mode=HTML"
+        curl -s "https://api.telegram.org/bot${telegram_bot_api}/sendmessage" -d "text=${bot_git_branch} ${1}" -d "chat_id=${telegram_chat_id}" -d "parse_mode=HTML"
 }
 
 # Set the upload function
