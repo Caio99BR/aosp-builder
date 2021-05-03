@@ -159,8 +159,8 @@ if ${builder_extract_vendor}; then
   fi
 
   # Extract the system and vendor data from the LineageOS archive.
-  unzip "${basename_rom}".zip system.transfer.list system.new.dat*
-  unzip "${basename_rom}".zip vendor.transfer.list vendor.new.dat* 
+  unzip "${basename_rom}" system.transfer.list system.new.dat*
+  unzip "${basename_rom}" vendor.transfer.list vendor.new.dat* 
 
   # The vendor and system data files are compress, so decompress them before we use them.
   if [ -f "system.new.dat.br" ];then
