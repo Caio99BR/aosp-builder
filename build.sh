@@ -104,14 +104,11 @@ if ${builder_extract_vendor}; then
   # Enter the system_dump directory.
   cd "${buildsh_dump_rom}"/ || { echo "Dir not found..."; exit 1; }
 
-  # Install brotli
-  sudo apt-get install brotli wget
-
   # Download sdat2img
-  wget https://raw.githubusercontent.com/xpirt/sdat2img/master/sdat2img.py
+  aria2c https://raw.githubusercontent.com/xpirt/sdat2img/master/sdat2img.py -x16 -s50
 
   # Download the build zip.
-  wget "${builder_lastest_rom}"
+  aria2c "${builder_lastest_rom}" -x16 -s50
 
   basename_rom=$(basename ./*.zip)
 
