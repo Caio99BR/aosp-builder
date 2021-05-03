@@ -26,7 +26,7 @@ bot_send "Start CCache download!"
 ccache_url=http://roms.apon77.workers.dev/ccache/ci2/ccache.tar.gz
 
 # Working dir
-cd ${CIRRUS_WORKING_DIR}/../ || { echo "Dir not found..."; exit 1; }
+cd "${CIRRUS_WORKING_DIR}"/../ || { echo "Dir not found..."; exit 1; }
 
 # Using aria2c for download
 aria2c "${ccache_url}" -x16 -s50

@@ -75,10 +75,10 @@ mkdir -p ~/.config/rclone
 echo "${rclone_config}" > ~/.config/rclone/rclone.conf
 
 # Working ROM dir
-mkdir -p ${buildsh_working_dir}
+mkdir -p "${buildsh_working_dir}"
 
 # Enter the working dir
-cd ${buildsh_working_dir} || { echo "Dir not found..."; exit 1; }
+cd "${buildsh_working_dir}" || { echo "Dir not found..."; exit 1; }
 
 bot_send "Sync start!"
 
@@ -99,10 +99,10 @@ bot_send "Sync done!"
 # https://wiki.lineageos.org/extracting_blobs_from_zips.html
 if ${builder_extract_vendor}; then
   # Create the system_dump directory.
-  mkdir -p ${buildsh_dump_rom}/
+  mkdir -p "${buildsh_dump_rom}"/
   
   # Enter the system_dump directory.
-  cd ${buildsh_dump_rom}/ || { echo "Dir not found..."; exit 1; }
+  cd "${buildsh_dump_rom}"/ || { echo "Dir not found..."; exit 1; }
 
   # Install brotli
   sudo apt-get install brotli wget
@@ -111,9 +111,9 @@ if ${builder_extract_vendor}; then
   wget https://raw.githubusercontent.com/xpirt/sdat2img/master/sdat2img.py
 
   # Download the build zip.
-  wget ${builder_lastest_rom}
+  wget "${builder_lastest_rom}"
 
-  basename_rom=$(basename *.zip)
+  basename_rom=$(basename ./*.zip)
 
   if [ ! -f "${basename_rom}" ]; then
     echo "Vendor blobs zip file not found..."
@@ -121,8 +121,8 @@ if ${builder_extract_vendor}; then
   fi
 
   # Extract the system and vendor data from the LineageOS archive.
-  unzip ${basename_rom}.zip system.transfer.list system.new.dat*
-  unzip ${basename_rom}.zip vendor.transfer.list vendor.new.dat* 
+  unzip "${basename_rom}".zip system.transfer.list system.new.dat*
+  unzip "${basename_rom}".zip vendor.transfer.list vendor.new.dat* 
 
   # The vendor and system data files are compress, so decompress them before we use them.
   if [ -f "system.new.dat.br" ];then
@@ -146,18 +146,18 @@ if ${builder_extract_vendor}; then
   sudo mount vendor.img system/vendor/
 
   # Go to device-tree
-  cd ${buildsh_working_dir}/device/${builder_target_brand}/${builder_target_device}/ || { echo "Dir not found..."; exit 1; }
+  cd "${buildsh_working_dir}"/device/${builder_target_brand}/${builder_target_device}/ || { echo "Dir not found..."; exit 1; }
 
   # Finally extract device blobs
-  ./extract-files.sh ${buildsh_dump_rom}/
+  ./extract-files.sh "${buildsh_dump_rom}"/
 
   # Back the working dir
-  cd ${buildsh_working_dir} || { echo "Dir not found..."; exit 1; }
+  cd "${buildsh_working_dir}" || { echo "Dir not found..."; exit 1; }
 
 fi
 
 # Normal build steps
-. build/envsetup.sh
+source build/envsetup.sh
 lunch ${rom_make_lunch}${builder_target_device}${rom_make_type}
 
 # Set ccache options
@@ -178,12 +178,12 @@ if ${builder_ccache_only}; then
 else
   bot_send "Building ROM Started!"
   make -j10 ${rom_make_args}
-  upload_target ${buildsh_working_dir}/out/target/product/${builder_target_device}/*.zip
+  upload_target "${buildsh_working_dir}"/out/target/product/${builder_target_device}/*.zip
 fi
 
 ccache -s # Let's print ccache statistics finally
 
-cd ${CIRRUS_WORKING_DIR}/../ || { echo "Dir not found..."; exit 1; }
+cd "${CIRRUS_WORKING_DIR}"/../ || { echo "Dir not found..."; exit 1; }
 
 # Compress ccache with same name
 compress_ccache ccache 1
