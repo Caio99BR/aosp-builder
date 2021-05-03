@@ -29,10 +29,6 @@ ccache_url=http://roms.apon77.workers.dev/ccache/ci2/ccache.tar.gz
 mkdir -p ~/.config/rclone
 echo "${rclone_config}" > ~/.config/rclone/rclone.conf
 
-# Use the config head from rclone config
-rclone_config_head=$(echo "${rclone_config}" | head -1)
-export RCLONE_CONFIG_HEAD=${rclone_config_name:1:-1}
-
 # Working dir
 cd ${CIRRUS_TMP_DIR}/ || { echo "Dir not found..."; exit 1; }
 

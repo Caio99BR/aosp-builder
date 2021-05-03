@@ -23,6 +23,10 @@ export CCACHE_DIR=/tmp/ccache
 export CCACHE_EXEC=${ccache_exec}
 export USE_CCACHE=1
 
+# Use the config head from rclone config
+rclone_config_head=$(echo "${rclone_config}" | head -1)
+RCLONE_CONFIG_HEAD=${rclone_config_name:1:-1}
+
 # THIS IS A MESS, BUT ONLY WORK THIS WAY!
 bot_send() {
         curl -s "https://api.telegram.org/bot${telegram_bot_api}/sendmessage" -d "text=${1}" -d "chat_id=${telegram_chat_id}" -d "parse_mode=HTML"
