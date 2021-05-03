@@ -17,7 +17,7 @@
 
 # LOCAL VARIABLES
 builder_ccache_only="false" # current: disabled
-builder_ccache_url=http://roms.apon77.workers.dev/ccache/ci2/ccache.tar.gz
+builder_ccache_url=https://roms.apon77.workers.dev/ccache/ci2/ccache.tar.gz
 
 # GIT VARIABLES
 bot_git_branch=$(git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/(\1)/')
