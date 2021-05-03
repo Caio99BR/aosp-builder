@@ -39,6 +39,8 @@ buildsh_working_dir="${CIRRUS_WORKING_DIR}/../rom" # Where the rom is builded
 buildsh_dump_rom="${CIRRUS_WORKING_DIR}/../dump_rom"
 buildsh_rclone_config=$(echo "${rclone_config}" | head -1)
 buildsh_rclone_config="${buildsh_rclone_config:1:-1}"
+builder_ccache_only="false" # current: disabled
+builder_ccache_url=https://roms.apon77.workers.dev/ccache/ci2/ccache.tar.gz
 
 # GLOBAL VARIABLES
 ccache_exec=$(which ccache)
@@ -76,6 +78,30 @@ compress_ccache()
 {
   tar --use-compress-program="pigz -k -${2} " -cf "${1}".tar.gz "${1}"
 }
+
+if ${builder_ccache_only}; then
+
+  bot_send "Skipping CCache download!"
+
+else
+
+  bot_send "Start CCache download!"
+
+  # Working dir
+  cd "${CIRRUS_WORKING_DIR}"/../ || { bot_send "Dir not found..."; exit 1; }
+
+  # Using aria2c for download
+  aria2c "${builder_ccache_url}" -x16 -s50 || { bot_send "File not found..."; exit 1; }
+
+  # Extract ccache
+  time tar xf ccache.tar.gz 
+
+  # Remove downloaded file
+  rm -rf ccache.tar.gz
+
+  bot_send "Download CCache done!"
+
+fi
 
 # Write rclone config found from env variable, so that cloud storage can be used to upload ccache
 mkdir -p ~/.config/rclone
