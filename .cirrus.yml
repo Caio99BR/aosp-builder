@@ -32,8 +32,6 @@ task:
       - ./rom.sh # Start Rom Script
       - ./device.sh # Start Device Specific changes
       - ./sync.sh # Source Sync Script
-    monitor_background_script: # To monitor ccache and machine status every minute, runs in background
-      - ./monitor.sh # [Background] Monitor Build script
     build_script: # Actual build script foreground
       - ./build.sh # Build Script
     upload_ccache_script: # Upload ccache to cloud foreground
