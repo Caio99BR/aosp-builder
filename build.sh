@@ -118,18 +118,19 @@ bot_send "Sync start!"
 # Update repo
 builder_repo_bin="${CIRRUS_WORKING_DIR}/../.bin"
 mkdir -p "${builder_repo_bin}"
+export PATH="${builder_repo_bin}:${PATH}"
 curl "https://gerrit.googlesource.com/git-repo/+/refs/heads/main/repo?format=TEXT" | base64 --decode > ${builder_repo_bin}/repo
 chmod a+rx ${builder_repo_bin}/repo
 
 # Repo init command, that -device,-mips,-darwin,-notdefault part will save you more time and storage to sync, add more according to your rom and choice.
 # Optimization is welcomed! Let's make it quit, and with depth=1 so that no unnecessary things.
-${builder_repo_bin}/repo init -q --no-repo-verify --depth=1 -u ${rom_manifest} -b ${rom_manifest_branch} -g default,-device,-mips,-darwin,-notdefault
+repo init -q --no-repo-verify --depth=1 -u ${rom_manifest} -b ${rom_manifest_branch} -g default,-device,-mips,-darwin,-notdefault
 
 # Clone local manifest! So that no need to manually git clone repos or change hals, you can use normal git clone or rm and re clone, they will cost little more time, and you may get timeout! Let's make it quit and depth=1 too.
 git clone "${builder_github}" --depth 1 -b "${builder_github_branch}" .repo/local_manifests
 
 # Sync source with -q, no need unnecessary messages, you can remove -q if want! try with -j30 first, if fails, it will try again with -j8
-${builder_repo_bin}/repo sync -c --no-clone-bundle --no-tags --optimized-fetch --prune --force-sync -j 30 || repo sync -c --no-clone-bundle --no-tags --optimized-fetch --prune --force-sync -j 8
+repo sync -c --no-clone-bundle --no-tags --optimized-fetch --prune --force-sync -j 30 || repo sync -c --no-clone-bundle --no-tags --optimized-fetch --prune --force-sync -j 8
 
 bot_send "Sync done!"
 
