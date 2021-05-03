@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright 2021 Caio99BR
+# Copyright 2021 Apon77
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,12 +15,26 @@
 # limitations under the License.
 #
 
-# THIS IS A MESS, BUT ONLY WORK THIS WAY!
+# Set the bot for this background script
 bot_send() {
         curl -s "https://api.telegram.org/bot${telegram_bot_api}/sendmessage" -d "text=${1}" -d "chat_id=${telegram_chat_id}" -d "parse_mode=HTML"
 }
 
-cd ${CIRRUS_ROM_DIR} || { echo "Dir not found..."; exit 1; }
+bot_send "Start CCache download!"
 
-# Clone local manifest! So that no need to manually git clone repos or change hals, you can use normal git clone or rm and re clone, they will cost little more time, and you may get timeout! Let's make it quit and depth=1 too.
-git clone https://github.com/Apon77Lab/android_.repo_local_manifests.git --depth 1 -b aex .repo/local_manifests
+# Current ccache
+ccache_url=http://roms.apon77.workers.dev/ccache/ci2/ccache.tar.gz
+
+# Working dir
+cd ${CIRRUS_WORKING_DIR}/../ || { echo "Dir not found..."; exit 1; }
+
+# Using aria2c for download
+aria2c "${ccache_url}" -x16 -s50
+
+# Extract ccache
+tar xf ccache.tar.gz 
+
+# Remove downloaded file
+rm -rf ccache.tar.gz
+
+bot_send "Download CCache done!"

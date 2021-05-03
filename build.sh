@@ -17,24 +17,38 @@
 # TODO2: Optimize with AdrianDC/advanced_development_shell_tools
 # TODO3: Add variable to check files
 
+# ROM BUILD VARIABLES
+rom_manifest="git://github.com/AospExtended/manifest.git"
+rom_manifest_branch="11.x"
+rom_make_args="aex"
+rom_make_lunch="aosp_"
+rom_make_type="-user"
+
+# DEVICE BUILD VARIABLES
+builder_github="https://github.com/Apon77Lab/android_.repo_local_manifests.git"
+builder_github_branch="aex"
+builder_target_device="mido"
+builder_target_brand="xiaomi"
+builder_ccache_only="false" # current: disabled
+builder_temp_upload="false" # upload to drive
+
+# Build.sh VARIABLES
+buildsh_working_dir="/tmp/rom" # Where the rom is builded
+buildsh_rclone_config=$(echo "${rclone_config}" | head -1)
+buildsh_rclone_config=${buildsh_rclone_config:1:-1}
+
 # GLOBAL VARIABLES
 ccache_exec=$(which ccache)
 export CCACHE_DIR=/tmp/ccache
 export CCACHE_EXEC=${ccache_exec}
 export USE_CCACHE=1
 
-# Use the config head from rclone config
-rclone_config_head=$(echo "${rclone_config}" | head -1)
-RCLONE_CONFIG_HEAD=${rclone_config_name:1:-1}
-
-# THIS IS A MESS, BUT ONLY WORK THIS WAY!
+# Set bot function
 bot_send() {
         curl -s "https://api.telegram.org/bot${telegram_bot_api}/sendmessage" -d "text=${1}" -d "chat_id=${telegram_chat_id}" -d "parse_mode=HTML"
 }
 
-# Depends on where source got synced
-cd ${CIRRUS_ROM_DIR} || { echo "Dir not found..."; exit 1; }
-
+# Set the upload function
 upload_target()
 {
   if ${builder_temp_upload}; then
@@ -43,13 +57,45 @@ upload_target()
     curl --upload-file "${1}" https://transfer.sh/"${basename_toup}"
   else
 	# 'junk' is where zip will be saved
-    rclone copy "${1}" "${RCLONE_CONFIG_HEAD}":junk -P
+    rclone copy "${1}" "${buildsh_rclone_config}":junk -P
   fi
 }
 
+# Set compress function with pigz for faster compression
+compress_ccache()
+{
+  tar --use-compress-program="pigz -k -${2} " -cf "${1}".tar.gz "${1}"
+}
+
+# Write rclone config found from env variable, so that cloud storage can be used to upload ccache
+mkdir -p ~/.config/rclone
+echo "${rclone_config}" > ~/.config/rclone/rclone.conf
+
+# Working ROM dir
+mkdir -p ${buildsh_working_dir}
+
+# Enter the working dir
+cd ${buildsh_working_dir} || { echo "Dir not found..."; exit 1; }
+
+# Repo init command, that -device,-mips,-darwin,-notdefault part will save you more time and storage to sync, add more according to your rom and choice.
+# Optimization is welcomed! Let's make it quit, and with depth=1 so that no unnecessary things.
+repo init -q --no-repo-verify --depth=1 -u ${rom_manifest} -b ${rom_manifest_branch} -g default,-device,-mips,-darwin,-notdefault
+
+# Clone local manifest! So that no need to manually git clone repos or change hals, you can use normal git clone or rm and re clone, they will cost little more time, and you may get timeout! Let's make it quit and depth=1 too.
+git clone "${builder_github}" --depth 1 -b "${builder_github_branch}" .repo/local_manifests
+
+bot_send "Sync start!"
+
+# Sync source with -q, no need unnecessary messages, you can remove -q if want! try with -j30 first, if fails, it will try again with -j8
+repo sync -c --no-clone-bundle --no-tags --optimized-fetch --prune --force-sync -j 30 || repo sync -c --no-clone-bundle --no-tags --optimized-fetch --prune --force-sync -j 8
+
+bot_send "Sync done!"
+
 # Normal build steps
 . build/envsetup.sh
-lunch aosp_${builder_target_device}-user
+lunch ${rom_make_lunch}${builder_target_device}${rom_make_type}
+
+# Set ccache options
 ccache -M 20G # It took only 6.4GB for mido
 ccache -o compression=true # Will save times and data to download and upload ccache, also negligible performance issue
 ccache -z # Clear old stats, so monitor script will provide real ccache statistics
@@ -62,12 +108,20 @@ if ${builder_ccache_only}; then
   # Build for 85m then kill the process
   # This is for build the ccache and upload
   bot_send "Building CCache Started!"
-  make -j10 ${ROM_MAKE_ARGS} & sleep 85m
+  make -j10 ${rom_make_args} & sleep 85m
   kill %1
 else
   bot_send "Building ROM Started!"
-  make -j10 ${ROM_MAKE_ARGS}
-  upload_target ${CIRRUS_ROM_DIR}/out/target/product/${builder_target_device}/*.zip
+  make -j10 ${rom_make_args}
+  upload_target ${buildsh_working_dir}/out/target/product/${builder_target_device}/*.zip
 fi
 
 ccache -s # Let's print ccache statistics finally
+
+cd ${CIRRUS_WORKING_DIR}/../ || { echo "Dir not found..."; exit 1; }
+
+# Compress ccache with same name
+compress_ccache ccache 1
+
+# Upload ccache
+rclone copy ccache.tar.gz "${buildsh_rclone_config}":ccache/ci2 -P # 'ccache/ci2' is where ccache will be saved
