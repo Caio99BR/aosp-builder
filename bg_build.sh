@@ -19,9 +19,12 @@
 builder_ccache_only="false" # current: disabled
 builder_ccache_url=http://roms.apon77.workers.dev/ccache/ci2/ccache.tar.gz
 
-# Set the bot for this background script
+# GIT VARIABLES
+bot_git_branch=$(git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/(\1)/')
+
+# Set bot function
 bot_send() {
-        curl -s "https://api.telegram.org/bot${telegram_bot_api}/sendmessage" -d "text=${1}" -d "chat_id=${telegram_chat_id}" -d "parse_mode=HTML"
+        curl -s "https://api.telegram.org/bot${telegram_bot_api}/sendmessage" -d "text=${bot_git_branch} ${1}" -d "chat_id=${telegram_chat_id}" -d "parse_mode=HTML"
 }
 
 if ${builder_ccache_only}; then
