@@ -1,10 +1,23 @@
 env: # Environment variables to pass to all tasks
     CIRRUS_CLONE_DEPTH: 1 # No need to clone with the whole history
     CIRRUS_WORKING_DIR: "/tmp/ci" # Where to clone the aosp-builder repo
+    CIRRUS_ROM_DIR: "/tmp/rom" # Where the rom is builded
+    CIRRUS_TMP_DIR: "/tmp" # Where tmp
+    ROM_MAKE_ARGS: "aex"
+    builder_target_device: "mido"
+    builder_target_brand: "xiaomi"
+    builder_ccache_only: "false" # current: enabled
+    builder_temp_upload: "false" # upload to transfesh
 
     # For rclone with google drive or any cloud! After first commit pushing, login to https://cirrus-ci.com , click top left corner 3 dot menu, click repository(yourname/aosp-builder) > Repository Settings > Secured Variables > enter content of ~/.config/rclone/rclone.conf (from pc where you setup rclone) > ENCRYPT, copy that ENCRYPTED hash
     # ENCRYPTED variables is unique for every repository, so you cant use my one, create you rclone config https://rclone.org/drive/#making-your-own-client-id
-    rclone_config: "ENCRYPTED[e6b57489e5e364b7013542660ce6823fc390190fed3d96d36c5df048fb2750a23cb0d4180171363a566d38eb8ce8bf2f]"
+    rclone_config: "ENCRYPTED[fd64a7e173bf1b4278fe201974508016b6efb490d4d9679b1032c1bed8257bee95e88a19d42064c929888af8888b44f8]"
+    
+    # Insert your Telegram Api here, check https://core.telegram.org/bots#6-botfather for more info
+    telegram_bot_api: ENCRYPTED[d24dd103d26fccaa4d8f75f8601a307890b08b87350cd0864288203503087f1921c1c91d4c46f6fcf33d9dfc052fa769]
+    # Insert you Telegram Chat Id or Group Id
+    # for personal only messages use @userinfobot to get chat Id
+    telegram_chat_id: ENCRYPTED[9b91de35bae688ec8c73d27b408a203c903d7330d2bde3d504feb73601091189486154372beec1c4f63aa36c4308d520]
 
 task:
     name: aosp # Project name
@@ -14,12 +27,14 @@ task:
       cpu: 8  #8 or less cpu for dummy build, 8 cpu for the final build, 8cpu highest for free accounts. Don't try to use more than 8cpu as free user, you may get blocked by ci.
       memory: 32G # So that we can have ram when needed, 32G highest
     download_ccache_background_script: # To download ccache in background
-      - ./download_ccache # Ccache download script
+      - ./download_ccache.sh # [Background] CCache Download Script
     sync_script: # To sync source
-      - ./sync # Source sync script
+      - ./rom.sh # Start Rom Script
+      - ./device.sh # Start Device Specific changes
+      - ./sync.sh # Source Sync Script
     monitor_background_script: # To monitor ccache and machine status every minute, runs in background
-      - ./monitor # Monitor script
+      - ./monitor.sh # [Background] Monitor Build script
     build_script: # Actual build script foreground
-      - ./build # Build script to run
+      - ./build.sh # Build Script
     upload_ccache_script: # Upload ccache to cloud foreground
-      - ./upload_ccache # Ccache uploading script
+      - ./upload_ccache.sh # CCache Upload Script
