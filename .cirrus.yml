@@ -4,7 +4,13 @@ env: # Environment variables to pass to all tasks
 
     # For rclone with google drive or any cloud! After first commit pushing, login to https://cirrus-ci.com , click top left corner 3 dot menu, click repository(yourname/aosp-builder) > Repository Settings > Secured Variables > enter content of ~/.config/rclone/rclone.conf (from pc where you setup rclone) > ENCRYPT, copy that ENCRYPTED hash
     # ENCRYPTED variables is unique for every repository, so you cant use my one, create you rclone config https://rclone.org/drive/#making-your-own-client-id
-    rclone_config: "ENCRYPTED[e6b57489e5e364b7013542660ce6823fc390190fed3d96d36c5df048fb2750a23cb0d4180171363a566d38eb8ce8bf2f]"
+    rclone_config: "ENCRYPTED[7f2cbbddbacb0c7511fbeaa0d2c3fc14c6f38c0daa68b7ae50413b365da99a98a5303d1ce0a1fc68a56e9b06c5a9c1e5]"
+    
+    # Insert your Telegram Api here, check https://core.telegram.org/bots#6-botfather for more info
+    telegram_bot_api: ENCRYPTED[d24dd103d26fccaa4d8f75f8601a307890b08b87350cd0864288203503087f1921c1c91d4c46f6fcf33d9dfc052fa769]
+    # Insert you Telegram Chat Id or Group Id
+    # for personal only messages use @userinfobot to get chat Id
+    telegram_chat_id: ENCRYPTED[9b91de35bae688ec8c73d27b408a203c903d7330d2bde3d504feb73601091189486154372beec1c4f63aa36c4308d520]
 
 task:
     name: aosp # Project name
@@ -13,13 +19,5 @@ task:
       image: apon77/aosp:latest # It has built-in setup environment + repo, aria2, rclone, pigz, username ci, and email ci@ci.ci [You can use your own docker image if you want, or you can use this one too!]
       cpu: 8  #8 or less cpu for dummy build, 8 cpu for the final build, 8cpu highest for free accounts. Don't try to use more than 8cpu as free user, you may get blocked by ci.
       memory: 32G # So that we can have ram when needed, 32G highest
-    download_ccache_background_script: # To download ccache in background
-      - ./download_ccache # Ccache download script
-    sync_script: # To sync source
-      - ./sync # Source sync script
-    monitor_background_script: # To monitor ccache and machine status every minute, runs in background
-      - ./monitor # Monitor script
-    build_script: # Actual build script foreground
-      - ./build # Build script to run
-    upload_ccache_script: # Upload ccache to cloud foreground
-      - ./upload_ccache # Ccache uploading script
+    build_script: # All-Steps-On-One-Script
+      - ./build.sh # Start Rom Script
