@@ -40,7 +40,6 @@ buildsh_working_dir="${CIRRUS_WORKING_DIR}/../rom" # Where the rom is builded
 buildsh_dump_rom="${CIRRUS_WORKING_DIR}/../dump_rom"
 buildsh_rclone_config=$(echo "${rclone_config}" | head -1)
 buildsh_rclone_config="${buildsh_rclone_config:1:-1}"
-builder_ccache_only="false" # current: disabled
 builder_ccache_url=https://roms.apon77.workers.dev/ccache/ci2/ccache.tar.gz
 
 # GLOBAL VARIABLES
