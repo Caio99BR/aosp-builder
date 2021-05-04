@@ -18,22 +18,22 @@
 # TODO3: Add variable to check files
 
 # ROM BUILD VARIABLES
-rom_manifest="git://github.com/AospExtended/manifest.git"
-rom_manifest_branch="11.x"
-rom_make_args="aex"
-rom_make_lunch="aosp_"
+rom_manifest="git://github.com/LineageOS/android.git"
+rom_manifest_branch="lineage-18.1"
+rom_make_args=""
+rom_make_lunch="lineage_"
 rom_make_type="-user"
 
 # DEVICE BUILD VARIABLES
 builder_with_local_manifest="true"
-builder_github="https://github.com/Apon77Lab/android_.repo_local_manifests.git"
-builder_github_branch="aex"
-builder_target_device="mido"
+builder_github="https://github.com/Caio99BR/android_.repo_local_manifests.git"
+builder_github_branch="lineage-18.1"
+builder_target_device="beryllium"
 builder_target_brand="xiaomi"
-builder_ccache_only="false" # current: disabled
+builder_ccache_only="true" # current: enabled
 builder_temp_upload="false" # upload to drive
-builder_extract_vendor="false" # current: disabled
-builder_lastest_rom="" # Latest zip
+builder_extract_vendor="true" # current: enabled
+builder_lastest_rom="https://mirrorbits.lineageos.org/full/beryllium/20210501/lineage-18.1-20210501-nightly-beryllium-signed.zip" # Latest zip
 
 # Build.sh VARIABLES
 buildsh_working_dir="${CIRRUS_WORKING_DIR}/../rom" # Where the rom is builded
