@@ -135,6 +135,9 @@ repo sync -c --no-clone-bundle --no-tags --optimized-fetch --prune --force-sync 
 
 bot_send "Sync done!"
 
+source build/envsetup.sh
+breakfast ${builder_target_device}
+
 # Extract vendor blobs direct from latest zip
 # Based on Lineage and other source
 # https://wiki.lineageos.org/extracting_blobs_from_zips.html
@@ -195,7 +198,6 @@ if ${builder_extract_vendor}; then
 fi
 
 # Normal build steps
-source build/envsetup.sh
 lunch ${rom_make_lunch}${builder_target_device}${rom_make_type}
 
 # Set ccache options
