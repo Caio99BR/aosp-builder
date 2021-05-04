@@ -148,7 +148,10 @@ fi
 if ${builder_extract_vendor}; then
   # Create the system_dump directory.
   mkdir -p "${buildsh_dump_rom}"/
-  
+
+  # Install brotli
+  sudo apt-get install brotli
+
   # Enter the system_dump directory.
   cd "${buildsh_dump_rom}"/ || { echo "Dir not found..."; exit 1; }
 
